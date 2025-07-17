@@ -255,7 +255,7 @@ class PDFProcessor:
                     text, block['font_size'], avg_font_size, block['font_flags']
                 )
                 
-                if confidence > 0.4:  # Threshold for heading detection
+                if confidence > 0.3:  # Lower threshold for more sensitive detection
                     headings.append(HeadingInfo(
                         text=text,
                         level=level,
