@@ -42,6 +42,26 @@ executor = ThreadPoolExecutor(max_workers=4)
 # Global model cache
 model_cache = {}
 
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# MongoDB connection
+mongo_url = os.environ['MONGO_URL']
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ['DB_NAME']]
+
+# Create the main app without a prefix
+app = FastAPI(title="PDF Intelligence System", version="1.0.0")
+
+# Create a router with the /api prefix
+api_router = APIRouter(prefix="/api")
+
+# Thread pool for CPU-intensive tasks
+executor = ThreadPoolExecutor(max_workers=4)
+
+# Global model cache
+model_cache = {}
+
 def get_heading_classifier():
     """Get or create heading classification model - using lightweight approach"""
     if 'heading_classifier' not in model_cache:
