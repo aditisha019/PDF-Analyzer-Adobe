@@ -12,7 +12,13 @@ import uuid
 from datetime import datetime
 import json
 import tempfile
-import fitz  # PyMuPDF
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    print("PyMuPDF not found. Installing...")
+    import subprocess
+    subprocess.check_call(['pip', 'install', 'PyMuPDF'])
+    import fitz
 import re
 from collections import defaultdict
 import numpy as np
