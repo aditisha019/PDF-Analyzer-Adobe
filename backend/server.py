@@ -19,7 +19,8 @@ import numpy as np
 from transformers import pipeline
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-
+import subprocess
+import sys
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -42,14 +43,10 @@ executor = ThreadPoolExecutor(max_workers=4)
 model_cache = {}
 
 def get_heading_classifier():
-    """Get or create heading classification model"""
+    """Get or create heading classification model - using lightweight approach"""
     if 'heading_classifier' not in model_cache:
-        # Using a lightweight model for heading classification
-        model_cache['heading_classifier'] = pipeline(
-            "text-classification",
-            model="microsoft/DialoGPT-small",
-            device=-1  # CPU only
-        )
+        # Skip heavy model loading for now - use rule-based approach
+        model_cache['heading_classifier'] = None
     return model_cache['heading_classifier']
 
 # Define Models
