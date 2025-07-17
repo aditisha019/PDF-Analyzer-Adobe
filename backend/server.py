@@ -181,38 +181,57 @@ class PDFProcessor:
                                avg_font_size: float, font_flags: int) -> tuple:
         """Determine if text is a heading based on structure analysis"""
         confidence = 0.0
-        level = 0
+        level = 3  # Default to H3
         
-        # Font size analysis
-        if font_size > avg_font_size * 1.5:
-            confidence += 0.3
+        # More aggressive font size analysis
+        if font_size > avg_font_size * 1.3:
+            confidence += 0.4
             level = 1
-        elif font_size > avg_font_size * 1.2:
-            confidence += 0.2
+        elif font_size > avg_font_size * 1.15:
+            confidence += 0.3
             level = 2
-        elif font_size > avg_font_size * 1.1:
-            confidence += 0.1
+        elif font_size > avg_font_size * 1.05:
+            confidence += 0.2
             level = 3
         
-        # Bold text (font flags)
+        # Bold text (font flags) - stronger indicator
         if font_flags & 2**4:  # Bold flag
-            confidence += 0.2
+            confidence += 0.3
         
-        # Pattern matching
-        for pattern in self.heading_patterns:
+        # Enhanced pattern matching
+        heading_indicators = [
+            r'^\d+\.\s+[A-Z]',  # 1. Introduction
+            r'^[A-Z][^.]*[A-Z]$',  # What is AI?
+            r'^[A-Z][a-z\s]+[A-Z]',  # History of AI
+            r'^[A-Z][a-z\s]+of\s+[A-Z]',  # Applications of AI
+            r'^[A-Z][A-Z\s]+$',  # ALL CAPS
+            r'^[A-Z][a-z\s]+in\s+[A-Z]',  # AI in Healthcare
+            r'^Use\s+of\s+[A-Z]',  # Use of AI in Radiology
+        ]
+        
+        for pattern in heading_indicators:
             if re.match(pattern, text):
                 confidence += 0.3
                 break
         
-        # Text characteristics
+        # Enhanced text characteristics
         if len(text) < 100 and text.count('.') <= 1:
-            confidence += 0.1
+            confidence += 0.15
+        
+        # Common heading words
+        heading_words = ['introduction', 'what', 'history', 'applications', 'use', 'conclusion']
+        if any(word in text.lower() for word in heading_words):
+            confidence += 0.2
         
         # Position and formatting
         if text.isupper() and len(text) < 50:
             confidence += 0.2
         
-        return confidence, level if level > 0 else 3
+        # Question format headings
+        if text.endswith('?'):
+            confidence += 0.2
+        
+        return confidence, level
     
     def detect_headings(self, pages_data: List[Dict]) -> List[HeadingInfo]:
         """Detect headings using multi-signal approach"""
